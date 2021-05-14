@@ -3,6 +3,8 @@ import axios, { AxiosError } from 'axios'
 import { parseCookies, setCookie } from 'nookies'
 import { signOut } from '../contexts/AuthContext'
 
+// THIS FILE IS ONLY CALLED ONCE: WHEN THE APP LOADS
+
 let isRefreshing = false
 let failedRequestsQueue = []
 
@@ -31,6 +33,7 @@ export function setupApiClient(ctx = undefined) {//nookies doesn't work in serve
 
         const {'nextauth.refreshToken': refreshToken} = cookies
         const originalConfig = error.config// takes all the configuration of each request that gave an error (remember: interceptor will be called many times)
+        //even error.config
 
         if (!isRefreshing) { //prevents other calls in progress from also attempting to update the token
           isRefreshing = true
@@ -52,7 +55,9 @@ export function setupApiClient(ctx = undefined) {//nookies doesn't work in serve
     
             api.defaults.headers['Authorization'] = `Bearer ${token}` // update **
 
-            failedRequestsQueue.forEach(request => request.onSuccess(token)) // call each request on the queue again
+            //WHEN refresh request end:
+
+            failedRequestsQueue.forEach(request => request.onSuccess(token)) // call each request on the queue, WHEN THE REQUEST TO refresh FINISH
             failedRequestsQueue = [] // clean the queue again
           }).catch(error => {
             failedRequestsQueue.forEach(request => request.onFailure(error)) // in case error
@@ -86,12 +91,13 @@ export function setupApiClient(ctx = undefined) {//nookies doesn't work in serve
         if (process.browser) {//verify if is browser side
           signOut()
         } else {
+          //exit of inteceptor, handle the error in the "catch" of the original call:
           return Promise.reject(new AuthTokenError())
         }
       }
     }
-
-    return Promise.reject(error) //If any error ocurrs
+    //exit of inteceptor, handle the error in the "catch" of the original call:
+    return Promise.reject(error) //any error other than 401 (unauthorized)
   })
 
   return api
