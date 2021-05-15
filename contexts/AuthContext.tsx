@@ -108,7 +108,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       // sessionStorage
       // localStorage
-      // cookies // next-server => [X] (lib: nookies)
+      // cookies // use with nextJS => [X] work with next-server (lib: nookies)
 
       setUser({
         email,

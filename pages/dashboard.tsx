@@ -1,4 +1,3 @@
-import { destroyCookie } from "nookies"
 import React, { useContext, useEffect } from "react"
 import { Can } from "../components/Can"
 import { AuthContext } from "../contexts/AuthContext"
@@ -39,8 +38,11 @@ export default function Dashboard() {
 
 export const getServerSideProps = withSSRAuth(async (ctx) => {
 
+  //since the "axios" "interceptor" uses "nookies", when "requests" are made by the "server-side" it is necessary to pass the context
+
   const apiClient = setupApiClient(ctx)//on the server side it is necessary to pass the context for the nookies to work
-  const response = await apiClient.get('/me')
+  const response = await apiClient.get('/me')//axios works in server-side and browser-side, but nookies uses the context on server-side
+  //this request above makes it necessary to pass the context to axios
 
   console.log(response.data)
 
