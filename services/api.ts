@@ -9,9 +9,10 @@ let isRefreshing = false
 let failedRequestsQueue = []
 
 export function setupApiClient(ctx = undefined) {//nookies doesn't work in server side without request context
+  //use setupApiClient when making a request through the server-side, passing the context
 
-  let cookies = parseCookies(ctx)
   // only called the first time the application is loaded, so we need uptade it every change **
+  let cookies = parseCookies(ctx)
   const api = axios.create({
     baseURL: 'http://localhost:3333',
     headers: {
@@ -44,12 +45,12 @@ export function setupApiClient(ctx = undefined) {//nookies doesn't work in serve
             const { token } = response.data
             
             setCookie(ctx, 'nextauth.token', token, { //set the new Token
-              nextAge: 60 * 60 * 24 * 30,
+              maxAge: 60 * 60 * 24 * 30,
               path: '/'
             })
             
             setCookie(ctx, 'nextauth.refreshToken', response.data.refreshToken, { // set the new refreshToken
-              nextAge: 60 * 60 * 24 * 30,
+              maxAge: 60 * 60 * 24 * 30,
               path: '/'
             })
     
@@ -57,6 +58,7 @@ export function setupApiClient(ctx = undefined) {//nookies doesn't work in serve
 
             //WHEN refresh request end:
 
+            //when call resolve all the promises are finished
             failedRequestsQueue.forEach(request => request.onSuccess(token)) // call each request on the queue, WHEN THE REQUEST TO refresh FINISH
             failedRequestsQueue = [] // clean the queue again
           }).catch(error => {

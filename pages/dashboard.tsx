@@ -9,10 +9,6 @@ import { withSSRAuth } from "../utils/withSSRAuth"
 export default function Dashboard() {
   const { user, signOut } = useContext(AuthContext)
 
-  const useCanSeeMetrics = useCan({
-    permissions: ['metrics.list']
-  })
-
   useEffect(() => {
     api.get('/me')
       .then(response => console.log(response))
@@ -37,9 +33,12 @@ export default function Dashboard() {
 }
 
 export const getServerSideProps = withSSRAuth(async (ctx) => {
+  // ***specific requests for each page must be made here, as well as anything else unique to each page***
+
+  console.log('do here specific things of this page')
 
   //since the "axios" "interceptor" uses "nookies", when "requests" are made by the "server-side" it is necessary to pass the context
-
+  
   const apiClient = setupApiClient(ctx)//on the server side it is necessary to pass the context for the nookies to work
   const response = await apiClient.get('/me')//axios works in server-side and browser-side, but nookies uses the context on server-side
   //this request above makes it necessary to pass the context to axios
